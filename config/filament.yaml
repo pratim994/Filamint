@@ -1,0 +1,29 @@
+version: 1
+
+sources:
+  production_pg:
+    type: postgres
+    config:
+      connection_method: url
+      dsn: env:POSTGRES_DSN
+      replication: cdc
+      publication: filament_pub
+      snapshot_mode: initial
+
+sinks:
+  analytical_sink:
+    type: postgres 
+    config:
+      connection_method: url
+      dsn: env:ANALYTICAL_SINK_DSN
+      schema: audit_replica
+
+pipelines:
+  orders_audit_cdc:
+    source: ref:production_pg
+    sink: ref:analytical_sink
+    resources:
+      - users
+      - orders
+      - transactions
+    write_mode: merge 
